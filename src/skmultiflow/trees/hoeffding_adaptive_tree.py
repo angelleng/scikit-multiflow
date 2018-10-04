@@ -476,7 +476,7 @@ class HAT(HoeffdingTree):
         return result
 
     def score(self, X, y):
-        raise NotImplementedError
+        return sum(self.predict(X) == y)/len(y)
 
     # Override HoeffdingTree
     def _new_learning_node(self, initial_class_observations=None):
