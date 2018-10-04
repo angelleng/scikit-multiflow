@@ -194,8 +194,8 @@ class AdaptiveRandomForest(StreamModel):
         self.nominal_attributes = nominal_attributes
 
     def fit(self, X, y, classes=None, weight=None):
-        raise NotImplementedError
-    
+        self.partial_fit(X, y, classes)
+
     def partial_fit(self, X, y, classes=None, weight=1.0):
         if self.classes is None and classes is not None:
             self.classes = classes
@@ -210,7 +210,7 @@ class AdaptiveRandomForest(StreamModel):
 
     def _partial_fit(self, X, y, classes=None, weight=1.0):
         self.instances_seen += 1
-        
+
         if self.ensemble is None:
             self.init_ensemble(X)
 
@@ -223,7 +223,7 @@ class AdaptiveRandomForest(StreamModel):
                                              classes=classes,
                                              weight=np.asarray([k]),
                                              instances_seen=self.instances_seen)
-    
+
     def predict(self, X):
         """Predicts the label of the X instance(s)
         Parameters
@@ -247,6 +247,7 @@ class AdaptiveRandomForest(StreamModel):
         return np.asarray(predictions)
 
     def predict_proba(self, X):
+# <<<<<<< HEAD
         """ Predicts the class probabilities for the X instance(s).
 
         Class probabilities are calculated as the mean predicted class probabilities per base estimator.
@@ -273,7 +274,22 @@ class AdaptiveRandomForest(StreamModel):
                 y_proba_mean = y_proba_mean + (y_proba - y_proba_mean) / (i+1)
 
         return normalize(y_proba_mean, norm='l1')
-        
+
+# =======
+#         r, _ = get_dimensions(X)
+#         proba = np.zeros((r, len(self.classes)))
+#         for i in range(r):
+#             votes = self.get_votes_for_instance(X[i])
+#             if votes == {}:
+#                 proba[i] = np.ones(len(self.classes)) / len(self.classes)
+#             else:
+#                 if sum(votes.values()) != 0:
+#                     normalize_values_in_dict(votes)
+#                 for key, value in votes.items():
+#                     proba[i, int(key)] = value
+#         return proba
+#
+# >>>>>>> 6f336f3... add unimplemented methods
     def reset(self):
         """Reset ARF."""
         self.ensemble = None
@@ -283,8 +299,8 @@ class AdaptiveRandomForest(StreamModel):
         self.random_state = check_random_state(self._init_random_state)
 
     def score(self, X, y):
-        raise NotImplementedError
-        
+        return sum(self.predict(X) == y)/len(y)
+
     def get_info(self):
         """Collect information about the Hoeffding Tree configuration.
 
@@ -323,7 +339,7 @@ class AdaptiveRandomForest(StreamModel):
                     except KeyError:
                         combined_votes[k] = vote[k]
         return combined_votes
-        
+
     def init_ensemble(self, X):
         self.ensemble = [None] * self.n_estimators
 
@@ -435,7 +451,7 @@ class ARFBaseLearner(BaseObject):
         self.background_learner = None
         self._use_drift_detector = False
         self._use_background_learner = False
-        
+
         self.evaluator = self.evaluator_method()
 
         # Initialize drift and warning detectors
@@ -446,7 +462,7 @@ class ARFBaseLearner(BaseObject):
         if warning_detection_method is not None:
             self._use_background_learner = True
             self.warning_detection = deepcopy(warning_detection_method)
-            
+
     def reset(self, instances_seen):
         if self._use_background_learner and self.background_learner is not None:
             self.classifier = self.background_learner.classifier

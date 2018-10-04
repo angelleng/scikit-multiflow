@@ -882,7 +882,7 @@ class HoeffdingTree(StreamModel):
         self._train_weight_seen_by_model = 0.0
 
     def fit(self, X, y, classes=None, weight=None):
-        raise NotImplementedError
+        self.partial_fit(X, y, classes, weight)
 
     def partial_fit(self, X, y, classes=None, weight=None):
         """ Incrementally trains the model. Train samples (instances) are composed of X attributes and their
@@ -1372,7 +1372,7 @@ class HoeffdingTree(StreamModel):
                     self.__find_learning_nodes(split_node.get_child(i), split_node, i, found)
 
     def score(self, X, y):
-        raise NotImplementedError
+        return sum(self.predict(X) == y)/len(y)
 
     def get_info(self):
         """ Collect information about the Hoeffding Tree configuration.
