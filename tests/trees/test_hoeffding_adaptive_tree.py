@@ -51,10 +51,16 @@ def test_hat_mc(test_path):
     expected_model_1 = 'Leaf = Class 1.0 | {0.0: 0.005295278636481529, 1.0: 1.9947047213635185}\n'
     expected_model_2 = 'Leaf = Class 1.0 | {0.0: 0.0052952786364815294, 1.0: 1.9947047213635185}\n'
     expected_model_3 = 'Leaf = Class 1.0 | {1.0: 1.9947047213635185, 0.0: 0.0052952786364815294}\n'
+    expected_model_4 = 'Leaf = Class 1.0 | {1.0: 1.9947047213635185, 0.0: 0.005295278636481529}\n'
+
     assert (learner.get_model_description() == expected_model_1) \
            or  (learner.get_model_description() == expected_model_2) \
-           or  (learner.get_model_description() == expected_model_3)
+           or  (learner.get_model_description() == expected_model_3) \
+           or  (learner.get_model_description() == expected_model_4) \
 
+
+    assert type(learner.predict(X)) == np.ndarray
+    assert type(learner.predict_proba(X)) == np.ndarray
 
     stream.restart()
     X, y = stream.next_sample(5000)
@@ -105,6 +111,8 @@ def test_hat_nb(test_path):
                     ' - nominal_attributes: [] - '
 
     assert learner.get_info() == expected_info
+    assert type(learner.predict(X)) == np.ndarray
+    assert type(learner.predict_proba(X)) == np.ndarray
 
 
 def test_hat_nba(test_path):
@@ -147,3 +155,5 @@ def test_hat_nba(test_path):
                     ' - nominal_attributes: [] - '
 
     assert learner.get_info() == expected_info
+    assert type(learner.predict(X)) == np.ndarray
+    assert type(learner.predict_proba(X)) == np.ndarray
