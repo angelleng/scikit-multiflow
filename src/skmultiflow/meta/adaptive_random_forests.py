@@ -192,7 +192,6 @@ class AdaptiveRandomForest(StreamModel):
         self.leaf_prediction = leaf_prediction
         self.nb_threshold = nb_threshold
         self.nominal_attributes = nominal_attributes
-        self.classes = None
 
     def fit(self, X, y, classes=None, weight=None):
         self.partial_fit(X, y, classes)

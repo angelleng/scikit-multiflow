@@ -6,61 +6,61 @@ from skmultiflow.utils.utils import *
 
 class KNN(StreamModel):
     """ K-Nearest Neighbors Classifier
-    
+
     This is a non-parametric classification method. The output of this
     algorithm are the n_neighbors closest training examples to the query sample
     X.
-    
-    It works by keeping track of a fixed number of training samples, in 
+
+    It works by keeping track of a fixed number of training samples, in
     our case it keeps track of the last max_window_size training samples.
-    Then, whenever a query request is executed, the algorithm will search 
-    its stored samples and find the closest ones using a selected distance 
+    Then, whenever a query request is executed, the algorithm will search
+    its stored samples and find the closest ones using a selected distance
     metric.
-    
-    To store the samples, while reducing search times, we use a structure 
+
+    To store the samples, while reducing search times, we use a structure
     called KD Tree (a K Dimensional Tree, for n_neighbors dimensional problems).
-    Although we do have our own KDTree implementation, which accepts 
-    custom metrics, we recommend using the standard scikit-learn KDTree,  
-    that even though doesn't accept custom metrics, is optimized and will 
+    Although we do have our own KDTree implementation, which accepts
+    custom metrics, we recommend using the standard scikit-learn KDTree,
+    that even though doesn't accept custom metrics, is optimized and will
     function faster.
-    
+
     Parameters
     ----------
     n_neighbors: int
         The number of nearest neighbors to search for.
-        
+
     max_window_size: int
         The maximum size of the window storing the last viewed samples.
-        
+
     leaf_size: int
-        The maximum number of samples that can be stored in one leaf node, 
-        which determines from which point the algorithm will switch for a 
-        brute-force approach. The bigger this number the faster the tree 
+        The maximum number of samples that can be stored in one leaf node,
+        which determines from which point the algorithm will switch for a
+        brute-force approach. The bigger this number the faster the tree
         construction time, but the slower the query time will be.
-        
+
     categorical_list: array-like
-        Each entry is the index of a categorical feature. May be requested 
+        Each entry is the index of a categorical feature. May be requested
         further filtering.
-    
+
     Raises
     ------
-    NotImplementedError: A few of the functions described here are not 
+    NotImplementedError: A few of the functions described here are not
     implemented since they have no application in this context.
-    
-    ValueError: A ValueError is raised if the predict function is called 
+
+    ValueError: A ValueError is raised if the predict function is called
     before at least n_neighbors samples have been analyzed by the algorithm.
-    
+
     Notes
     -----
-    For a KDTree functionality explanation, please see our KDTree 
+    For a KDTree functionality explanation, please see our KDTree
     documentation, under skmultiflow.lazy.neighbors.kdtree.
-    
-    This classifier is not optimal for a mixture of categorical and 
+
+    This classifier is not optimal for a mixture of categorical and
     numerical features.
-    
-    If you wish to use our KDTree implementation please refer to this class' 
+
+    If you wish to use our KDTree implementation please refer to this class'
     function __predict_proba
-    
+
     Examples
     --------
     >>> # Imports
@@ -90,7 +90,7 @@ class KNN(StreamModel):
     5000 samples analyzed.
     >>> print("KNN's performance: " + str(corrects/n_samples))
     KNN's performance: 0.868
-    
+
     """
 
     def __init__(self, n_neighbors=5, max_window_size=1000, leaf_size=30, categorical_list=None):
@@ -107,34 +107,34 @@ class KNN(StreamModel):
 
     def fit(self, X, y, classes=None, weight=None):
         """ fit
-        
-        Fits the model on the samples X and targets y. This is actually the 
+
+        Fits the model on the samples X and targets y. This is actually the
         function as the partial fit.
-        
-        For the K-Nearest Neighbors Classifier, fitting the model is the 
-        equivalent of inserting the newer samples in the observed window, 
-        and if the size_limit is reached, removing older results. To store 
-        the viewed samples we use a InstanceWindow object. For this class' 
+
+        For the K-Nearest Neighbors Classifier, fitting the model is the
+        equivalent of inserting the newer samples in the observed window,
+        and if the size_limit is reached, removing older results. To store
+        the viewed samples we use a InstanceWindow object. For this class'
         documentation please visit skmultiflow.core.utils.data_structures
-        
+
         Parameters
         ----------
         X: Numpy.ndarray of shape (n_samples, n_features)
             The data upon which the algorithm will create its model.
-            
+
         y: Array-like
-            An array-like containing the classification targets for all 
+            An array-like containing the classification targets for all
             samples in X.
-            
+
         classes: Not used.
 
         weight: Not used.
-        
+
         Returns
         -------
         KNN
             self
-        
+
         """
         r, c = get_dimensions(X)
         if classes is not None:
@@ -146,33 +146,33 @@ class KNN(StreamModel):
 
     def partial_fit(self, X, y, classes=None, weight=None):
         """ partial_fit
-        
+
         Fits the model on the samples X and targets y.
-        
-        For the K-Nearest Neighbors Classifier, fitting the model is the 
-        equivalent of inserting the newer samples in the observed window, 
-        and if the size_limit is reached, removing older results. To store 
-        the viewed samples we use a InstanceWindow object. For this class' 
+
+        For the K-Nearest Neighbors Classifier, fitting the model is the
+        equivalent of inserting the newer samples in the observed window,
+        and if the size_limit is reached, removing older results. To store
+        the viewed samples we use a InstanceWindow object. For this class'
         documentation please visit skmultiflow.core.utils.data_structures
-        
+
         Parameters
         ----------
         X: Numpy.ndarray of shape (n_samples, n_features)
             The data upon which the algorithm will create its model.
-            
+
         y: Array-like
-            An array-like containing the classification targets for all 
+            An array-like containing the classification targets for all
             samples in X.
 
         classes: Not used.
 
         weight: Not used.
-        
+
         Returns
         -------
         KNN
             self
-        
+
         """
         r, c = get_dimensions(X)
 
@@ -181,25 +181,26 @@ class KNN(StreamModel):
         return self
 
     def reset(self):
-        self.window.reset()
+        if self.window is not None:
+            self.window.reset()
         return self
 
     def predict(self, X):
         """ predict
-        
-        Predicts the label of the X sample, by searching the KDTree for 
+
+        Predicts the label of the X sample, by searching the KDTree for
         the n_neighbors-Nearest Neighbors.
-        
+
         Parameters
         ----------
         X: Numpy.ndarray of shape (n_samples, n_features)
             All the samples we want to predict the label for.
-            
+
         Returns
         -------
         list
             A list containing the predicted labels for all instances in X.
-        
+
         """
         r, c = get_dimensions(X)
         proba = self.predict_proba(X)
@@ -210,28 +211,28 @@ class KNN(StreamModel):
 
     def predict_proba(self, X):
         """ predict_proba
-         
-        Calculates the probability of each sample in X belonging to each 
+
+        Calculates the probability of each sample in X belonging to each
         of the labels, based on the knn algorithm.
-        
+
         Parameters
         ----------
         X: Numpy.ndarray of shape (n_samples, n_features)
-        
+
         Raises
         ------
-        ValueError: If there is an attempt to call this function before, 
+        ValueError: If there is an attempt to call this function before,
         at least, n_neighbors samples have been analyzed by the learner, a ValueError
         is raised.
-        
+
         Returns
         -------
         numpy.ndarray
-            An array of shape (n_samples, n_features), in which each outer entry is 
-            associated with the X entry of the same index. And where the list in 
+            An array of shape (n_samples, n_features), in which each outer entry is
+            associated with the X entry of the same index. And where the list in
             index [i] contains len(self.target_value) elements, each of which represents
             the probability that the i-th sample of X belongs to a certain label.
-         
+
         """
         if self.window is None or self.window.n_samples < self.n_neighbors:
             raise ValueError("KNN must be partially fitted on n_neighbors samples before doing any prediction.")
@@ -251,25 +252,25 @@ class KNN(StreamModel):
 
     def __predict_proba(self, X):
         """ __predict_proba
-        
+
         Private implementation of the predict_proba method.
-        
+
         Parameters
         ----------
         X: Numpy.ndarray of shape (n_samples, n_features)
-        
+
         Returns
         -------
         tuple list
-            One list with the k-nearest neighbor's distances and another 
+            One list with the k-nearest neighbor's distances and another
             one with their indexes.
-        
+
         Notes
         -----
-        If you wish to use our own KDTree implementation please comment 
-        the third line of this function and uncomment the first and 
+        If you wish to use our own KDTree implementation please comment
+        the third line of this function and uncomment the first and
         second lines.
-        
+
         """
         # tree = KDTree(self.window.get_attributes_matrix(), metric='euclidean',
         #              categorical_list=self.categorical_list, return_distance=True)

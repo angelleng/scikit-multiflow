@@ -8,20 +8,20 @@ from skmultiflow.utils.utils import get_dimensions
 
 def run(X, y, hyperParams):
     """ run
-    
+
     Test function for SAMKNN, not integrated with evaluation modules.
-    
+
     Parameters
     ----------
     X: numpy.ndarray of shape (n_samples, n_features)
         The feature's matrix, coded as 64 bits.
-    
+
     y: numpy.array of size n_samples
         The labels for all the samples in X coded as 8 bits.
-    
+
     hyperParams: dict
         A dictionary containing the __init__ params for the SAMKNN.
-    
+
     """
     r, c = get_dimensions(X)
     classifier = SAMKNN(n_neighbors=hyperParams['nNeighbours'],
@@ -52,6 +52,8 @@ if __name__ == '__main__':
     logging.info('loading dataset')
     # stream = FileStream("../data/datasets/weather.csv")
     stream = FileStream("../data/datasets/moving_squares.csv")
+    stream = FileStream("/Users/jing/local/scikit-multiflow/src/skmultiflow/data/datasets/covtype.csv")
+
     stream.prepare_for_use()
 
     X, y = stream.next_sample(stream.n_samples)
